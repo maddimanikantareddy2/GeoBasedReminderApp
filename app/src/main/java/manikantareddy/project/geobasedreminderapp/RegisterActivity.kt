@@ -2,13 +2,11 @@ package manikantareddy.project.geobasedreminderapp
 
 
 import android.app.Activity
-import android.content.ComponentCallbacks
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,7 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,11 +48,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlin.jvm.java
 
-class LoginActivity : ComponentActivity() {
+
+
+class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EnterAppScreen()
+            JoinAppScreen()
         }
     }
 }
@@ -60,8 +62,10 @@ class LoginActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnterAppScreen() {
+fun JoinAppScreen() {
+    var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
+    var userLocation by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
 
     val context = LocalContext.current as Activity
@@ -80,7 +84,7 @@ fun EnterAppScreen() {
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.ic_location_reminder),
+                painter = painterResource(id = R.drawable.ic_location_reminder), // Replace with your actual SVG drawable
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)
@@ -100,8 +104,30 @@ fun EnterAppScreen() {
             )
 
 
+
         Spacer(modifier = Modifier.height(54.dp))
 
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            value = userName,
+            onValueChange = { userName = it },
+            placeholder = { Text("Enter Name") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Email Icon",
+                    tint = Color.White
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             modifier = Modifier
@@ -113,6 +139,28 @@ fun EnterAppScreen() {
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
+                    contentDescription = "Email Icon",
+                    tint = Color.White
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            value = userLocation,
+            onValueChange = { userLocation = it },
+            placeholder = { Text("Enter Location") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
                     contentDescription = "Email Icon",
                     tint = Color.White
                 )
@@ -151,10 +199,18 @@ fun EnterAppScreen() {
             modifier = Modifier
                 .clickable {
                     when {
-                        userEmail.isEmpty() -> {
+                        userName.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
                         }
 
+                        userEmail.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        userLocation.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Location", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                         userPassword.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT).show()
                         }
@@ -164,6 +220,7 @@ fun EnterAppScreen() {
                         }
 
                     }
+
                 }
                 .width(200.dp)
                 .padding(horizontal = 12.dp)
@@ -182,7 +239,7 @@ fun EnterAppScreen() {
                 )
                 .padding(vertical = 12.dp, horizontal = 12.dp)
                 .align(Alignment.CenterHorizontally),
-            text = "SignIn",
+            text = "SignUp",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = colorResource(id = R.color.bg_color),
@@ -195,10 +252,10 @@ fun EnterAppScreen() {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
-                    context.startActivity(Intent(context, RegisterActivity::class.java))
+                    context.startActivity(Intent(context, LoginActivity::class.java))
                     context.finish()
                 },
-            text = "Or SignUp For Account",
+            text = "Or Continue To SignIn",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = colorResource(id = R.color.fg_color),

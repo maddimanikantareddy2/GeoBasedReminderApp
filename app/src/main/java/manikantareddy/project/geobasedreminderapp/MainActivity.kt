@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import manikantareddy.project.geobasedreminderapp.ui.theme.GeoBasedReminderAppTheme
+import kotlin.jvm.java
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,8 +54,8 @@ fun BrandDisplay() {
         val job = CoroutineScope(Dispatchers.Main).launch {
             delay(3000)
 //            onLoginClick(if (UserDetails.getLoginStatus(context)) 1 else 2)
-//            context.startActivity(Intent(context, SignInActivity::class.java))
-//            context.finish()
+            context.startActivity(Intent(context, LoginActivity::class.java))
+            context.finish()
         }
         onDispose { job.cancel() }
     }
