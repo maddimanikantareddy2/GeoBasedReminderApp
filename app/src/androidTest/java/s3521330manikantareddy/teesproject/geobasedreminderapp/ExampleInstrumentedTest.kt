@@ -1,4 +1,4 @@
-package manikantareddy.project.geobasedreminderapp
+package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

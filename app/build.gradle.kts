@@ -1,16 +1,16 @@
-import com.android.build.gradle.ProguardFiles.getDefaultProguardFile
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
+
 }
 
 android {
-    namespace = "manikantareddy.project.geobasedreminderapp"
+    namespace = "s3521330manikantareddy.teesproject.geobasedreminderapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "manikantareddy.project.geobasedreminderapp"
+        applicationId = "s3521330manikantareddy.teesproject.geobasedreminderapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -71,4 +71,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.firebase.database.ktx)
+
 }

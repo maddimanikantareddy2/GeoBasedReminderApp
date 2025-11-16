@@ -1,4 +1,4 @@
-package manikantareddy.project.geobasedreminderapp
+package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 
 import android.app.Activity
@@ -22,9 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,13 +46,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlin.jvm.java
 
-
-
-class RegisterActivity : ComponentActivity() {
+class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JoinAppScreen()
+            EnterAppScreen()
         }
     }
 }
@@ -62,10 +58,8 @@ class RegisterActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JoinAppScreen() {
-    var userName by remember { mutableStateOf("") }
+fun EnterAppScreen() {
     var userEmail by remember { mutableStateOf("") }
-    var userLocation by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
 
     val context = LocalContext.current as Activity
@@ -84,7 +78,7 @@ fun JoinAppScreen() {
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.ic_location_reminder), // Replace with your actual SVG drawable
+                painter = painterResource(id = R.drawable.ic_location_reminder),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)
@@ -104,30 +98,8 @@ fun JoinAppScreen() {
             )
 
 
-
         Spacer(modifier = Modifier.height(54.dp))
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            value = userName,
-            onValueChange = { userName = it },
-            placeholder = { Text("Enter Name") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Email Icon",
-                    tint = Color.White
-                )
-            },
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White,
-            ),
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             modifier = Modifier
@@ -140,29 +112,7 @@ fun JoinAppScreen() {
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = "Email Icon",
-                    tint = Color.White
-                )
-            },
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White,
-            ),
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            value = userLocation,
-            onValueChange = { userLocation = it },
-            placeholder = { Text("Enter Location") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Email Icon",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             },
             colors = TextFieldDefaults.colors(
@@ -184,7 +134,7 @@ fun JoinAppScreen() {
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = "Email Icon",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             },
             colors = TextFieldDefaults.colors(
@@ -199,18 +149,10 @@ fun JoinAppScreen() {
             modifier = Modifier
                 .clickable {
                     when {
-                        userName.isEmpty() -> {
+                        userEmail.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
                         }
 
-                        userEmail.isEmpty() -> {
-                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        userLocation.isEmpty() -> {
-                            Toast.makeText(context, " Please Enter Location", Toast.LENGTH_SHORT)
-                                .show()
-                        }
                         userPassword.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT).show()
                         }
@@ -220,7 +162,6 @@ fun JoinAppScreen() {
                         }
 
                     }
-
                 }
                 .width(200.dp)
                 .padding(horizontal = 12.dp)
@@ -239,10 +180,27 @@ fun JoinAppScreen() {
                 )
                 .padding(vertical = 12.dp, horizontal = 12.dp)
                 .align(Alignment.CenterHorizontally),
-            text = "SignUp",
+            text = "SignIn",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = colorResource(id = R.color.bg_color),
+            )
+        )
+
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    context.startActivity(Intent(context, ForgotPasswordActivity::class.java))
+                    context.finish()
+                },
+            text = "Or Forgot Password",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = colorResource(id = R.color.fg_color),
             )
         )
 
@@ -252,10 +210,10 @@ fun JoinAppScreen() {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
-                    context.startActivity(Intent(context, LoginActivity::class.java))
+                    context.startActivity(Intent(context, RegisterActivity::class.java))
                     context.finish()
                 },
-            text = "Or Continue To SignIn",
+            text = "Or SignUp For Account",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = colorResource(id = R.color.fg_color),

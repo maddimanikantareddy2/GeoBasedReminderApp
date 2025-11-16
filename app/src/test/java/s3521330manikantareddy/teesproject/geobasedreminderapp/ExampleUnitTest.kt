@@ -1,4 +1,4 @@
-package manikantareddy.project.geobasedreminderapp
+package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 import org.junit.Test
 

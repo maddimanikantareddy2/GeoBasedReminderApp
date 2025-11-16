@@ -1,6 +1,5 @@
-package manikantareddy.project.geobasedreminderapp.ui.theme
+package s3521330manikantareddy.teesproject.geobasedreminderapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

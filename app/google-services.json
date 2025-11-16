@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "648578936914",
+    "project_id": "geobasedreminderapp",
+    "storage_bucket": "geobasedreminderapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648578936914:android:83d6d4c43bd86ad730ef8b",
+        "android_client_info": {
+          "package_name": "s3521330manikantareddy.teesproject.geobasedreminderapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChrXXIlmHMEBlzXz87XzSUIe5RUOvXRfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

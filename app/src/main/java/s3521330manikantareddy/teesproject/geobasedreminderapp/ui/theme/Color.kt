@@ -1,4 +1,4 @@
-package manikantareddy.project.geobasedreminderapp.ui.theme
+package s3521330manikantareddy.teesproject.geobasedreminderapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

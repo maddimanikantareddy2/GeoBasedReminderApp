@@ -1,4 +1,4 @@
-package manikantareddy.project.geobasedreminderapp
+package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 import android.app.Activity
 import android.content.Intent
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -32,8 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import manikantareddy.project.geobasedreminderapp.ui.theme.GeoBasedReminderAppTheme
-import kotlin.jvm.java
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +41,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 
 @Composable
@@ -68,7 +66,7 @@ fun BrandDisplayScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.white)),
+            .background(color = colorResource(id = R.color.bg_color)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -79,7 +77,7 @@ fun BrandDisplayScreen() {
 
             Text(
                 text = "Welcome to",
-                color = colorResource(id = R.color.black),
+                color = colorResource(id = R.color.white),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -92,7 +90,7 @@ fun BrandDisplayScreen() {
 
             Text(
                 text = "Geo Based Reminder App",
-                color = colorResource(id = R.color.black),
+                color = colorResource(id = R.color.white),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -104,6 +102,19 @@ fun BrandDisplayScreen() {
             Image(
                 painter = painterResource(id = R.drawable.ic_location_reminder),
                 contentDescription = "Geo Based Reminder App",
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "By Manikanta Reddy",
+                color = colorResource(id = R.color.white),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 18.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             Spacer(modifier = Modifier.weight(1f))
