@@ -55,12 +55,10 @@ class HomeActivity : ComponentActivity() {
     }
 }
 
-// Enum for the two possible trigger types
 enum class TriggerType {
     ARRIVE, LEAVE
 }
 
-// Data class to represent a Reminder
 data class Reminder(
     val id: Int,
     var isActive: Boolean,
@@ -69,9 +67,7 @@ data class Reminder(
     val triggerType: TriggerType
 )
 
-/**
- * Main Composable for the Geo-Based Reminder Home Screen.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeoReminderHomeScreen(
@@ -155,16 +151,12 @@ fun GeoReminderHomeScreen(
     }
 }
 
-/**
- * Composable for displaying a single reminder item with controls.
- */
 @Composable
 fun ReminderCard(
     reminder: Reminder,
     onToggle: (Reminder, Boolean) -> Unit,
     onClick: (Reminder) -> Unit
 ) {
-    // Local state for the switch, used only for UI update until callback completes
     var checkedState by remember { mutableStateOf(reminder.isActive) }
 
     Card(
@@ -260,7 +252,6 @@ fun ReminderCard(
     }
 }
 
-// --- Preview ---
 @Preview(showBackground = true)
 @Composable
 fun GeoReminderHomeScreenPreview() {
