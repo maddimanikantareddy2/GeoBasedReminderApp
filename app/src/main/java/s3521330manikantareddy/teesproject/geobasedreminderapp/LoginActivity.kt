@@ -1,6 +1,7 @@
 package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 
+import android.R.attr.password
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.firebase.database.FirebaseDatabase
 import kotlin.jvm.java
 
 class LoginActivity : ComponentActivity() {
@@ -161,6 +163,33 @@ fun EnterAppScreen() {
                         }
 
                         else -> {
+
+                            val database = FirebaseDatabase.getInstance()
+                            val databaseReference = database.reference
+
+                            val sanitizedEmail = userEmail.replace(".", ",")
+
+                            databaseReference.child("UserAccounts").child(sanitizedEmail).get()
+                                .addOnSuccessListener { snapshot ->
+                                    if (snapshot.exists()) {
+                                        val chefData = snapshot.getValue(AccountData::class.java)
+                                        chefData?.let {
+
+                                            if (userPassword == it.password) {
+                                                Toast.makeText(context, "Login Successfull", Toast.LENGTH_SHORT).show()
+                                                context.startActivity(Intent(context, HomeActivity::class.java))
+                                                context.finish()
+                                            }
+                                            else{
+                                                Toast.makeText(context,"Incorrect Credentials",Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(context,"No User Found",Toast.LENGTH_SHORT).show()
+                                    }
+                                }.addOnFailureListener { exception ->
+                                    println("Error retrieving data: ${exception.message}")
+                                }
 
                         }
 
