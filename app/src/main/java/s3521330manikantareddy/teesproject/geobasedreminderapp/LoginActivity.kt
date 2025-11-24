@@ -2,6 +2,8 @@ package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -43,6 +45,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.jvm.java
 
@@ -62,7 +65,7 @@ fun EnterAppScreen() {
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
 
-    val context = LocalContext.current as Activity
+    val context = LocalContext.current.findActivity()
 
     Column(
         modifier = Modifier
@@ -194,7 +197,7 @@ fun EnterAppScreen() {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
-                    context.startActivity(Intent(context, ForgotPasswordActivity::class.java))
+                    context!!.startActivity(Intent(context, ForgotPasswordActivity::class.java))
                     context.finish()
                 },
             text = "Or Forgot Password",
@@ -210,7 +213,7 @@ fun EnterAppScreen() {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
-                    context.startActivity(Intent(context, RegisterActivity::class.java))
+                    context!!.startActivity(Intent(context, RegisterActivity::class.java))
                     context.finish()
                 },
             text = "Or SignUp For Account",
@@ -224,4 +227,16 @@ fun EnterAppScreen() {
 
 
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EnterAppScreenPreview() {
+    EnterAppScreen()
+}
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

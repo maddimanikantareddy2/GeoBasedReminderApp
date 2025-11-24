@@ -46,6 +46,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.database.FirebaseDatabase
 import java.time.LocalDate
@@ -74,7 +75,7 @@ fun JoinAppScreen() {
     var dob by remember { mutableStateOf("") }
 
 
-    val context = LocalContext.current as Activity
+    val context = LocalContext.current.findActivity()
 
     Column(
         modifier = Modifier
@@ -310,7 +311,7 @@ fun JoinAppScreen() {
                             if (task.isSuccessful) {
                                 Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show()
 
-                                context.startActivity(
+                                context!!.startActivity(
                                     Intent(
                                         context,
                                         LoginActivity::class.java
@@ -364,7 +365,7 @@ fun JoinAppScreen() {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
-                    context.startActivity(Intent(context, LoginActivity::class.java))
+                    context!!.startActivity(Intent(context, LoginActivity::class.java))
                     context.finish()
                 },
             text = "Or Continue To SignIn",
@@ -388,3 +389,9 @@ data class AccountData
     var email: String ="",
     var password: String ="",
 )
+
+@Preview(showBackground = true)
+@Composable
+fun JoinAppScreenPreview() {
+    JoinAppScreen()
+}
