@@ -12,6 +12,8 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.11.0"
 firebaseDatabaseKtx = "21.0.0"
+navigationCompose = "2.9.6"
+uiText = "1.9.5"
 
 
 
@@ -34,6 +36,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 
 
 [plugins]

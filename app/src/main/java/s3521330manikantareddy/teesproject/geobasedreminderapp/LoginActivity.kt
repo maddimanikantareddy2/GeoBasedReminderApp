@@ -164,6 +164,11 @@ fun EnterAppScreen() {
 
                         else -> {
 
+                            context!!.startActivity(Intent(context, ContainerActivity::class.java))
+                            context.finish()
+
+                            return@clickable
+
                             val database = FirebaseDatabase.getInstance()
                             val databaseReference = database.reference
 
@@ -177,7 +182,7 @@ fun EnterAppScreen() {
 
                                             if (userPassword == it.password) {
                                                 Toast.makeText(context, "Login Successfull", Toast.LENGTH_SHORT).show()
-                                                context.startActivity(Intent(context, HomeActivity::class.java))
+                                                context!!.startActivity(Intent(context, HomeActivity::class.java))
                                                 context.finish()
                                             }
                                             else{

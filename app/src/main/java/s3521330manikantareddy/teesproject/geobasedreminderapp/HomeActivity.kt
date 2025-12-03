@@ -1,5 +1,6 @@
 package s3521330manikantareddy.teesproject.geobasedreminderapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,6 +51,30 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            val sampleReminders = remember {
+                mutableStateListOf(
+                    Reminder(1, true, "Pick up dry cleaning", "Laundry Shop (50m radius)", TriggerType.ARRIVE),
+                    Reminder(2, false, "Email team meeting summary", "Office Building (200m radius)", TriggerType.LEAVE),
+                    Reminder(3, true, "Buy birthday cake ingredients", "Grocery Store (100m radius)", TriggerType.ARRIVE),
+                    Reminder(4, true, "Check meter reading", "Home Address", TriggerType.LEAVE),
+                )
+            }
+
+            GeoReminderHomeScreen(
+                reminders = sampleReminders,
+                onToggleReminder = { reminder, isActive ->
+                    val index = sampleReminders.indexOfFirst { it.id == reminder.id }
+                    if (index != -1) {
+                        sampleReminders[index] = sampleReminders[index].copy(isActive = isActive)
+                    }
+                },
+                onReminderClick = {
+                },
+                onCreateNewReminder = {
+
+                }
+            )
 
         }
     }
