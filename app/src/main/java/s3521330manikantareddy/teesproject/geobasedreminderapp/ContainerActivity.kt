@@ -28,7 +28,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Upcoming
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -75,21 +78,16 @@ fun ContainerScreen() {
 }
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object AddReminder : BottomNavItem("addreminder", "Add Reminder", Icons.Default.PlayArrow)
+    object AddReminder : BottomNavItem("addreminder", "Add Reminder", Icons.Default.Alarm)
     object SavedReminder :
-        BottomNavItem("savedreminders", "Saved Reminders", Icons.Default.PlayArrow)
+        BottomNavItem("savedreminders", "Saved Reminders", Icons.Default.Save)
 
     object UpcomingReminder :
-        BottomNavItem("upcomingreminder", "Upcoming Reminders", Icons.Default.PlayArrow)
+        BottomNavItem("upcomingreminder", "Upcoming Reminders", Icons.Default.Upcoming)
 }
 
 
-@Composable
-fun SavedReminders() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Saved Reminders")
-    }
-}
+
 
 @Composable
 fun UpcomingReminders() {

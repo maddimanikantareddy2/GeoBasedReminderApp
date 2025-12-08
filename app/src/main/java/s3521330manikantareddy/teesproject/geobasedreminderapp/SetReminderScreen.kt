@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.database.FirebaseDatabase
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -209,11 +210,13 @@ fun SetReminderScreen() {
                         Toast.makeText(context, "Reminder saved!", Toast.LENGTH_SHORT).show()
 
                         onSaveReminder(
-                            reminderTitle.trim(),
-                            selectedLocation!!,
-                            reminderType,
-                            reminderMessage.trim(),
-                            radius
+                            context = context,
+                            title = reminderTitle.trim(),
+                            location = selectedLocation!!,
+                            type = reminderType,
+                            message = reminderMessage.trim(),
+                            radius = radius,
+                            address = addressText
                         )
                     }
                 },
@@ -255,6 +258,68 @@ fun TriggerChip(
     }
 }
 
+data class GeoReminder(
+    val reminderId: String = "",
+    val title: String = "",
+    val message: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val radius: Float = 200f,
+    val triggerType: String = "", // Arrive / Leave
+    val address: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)
 
-fun onSaveReminder(title: String, location: LatLng, type: String, message: String, radius: Float) {
+fun onSaveReminder(
+    context: Context,
+    title: String,
+    location: LatLng,
+    type: String,
+    message: String,
+    radius: Float,
+    address: String
+) {
+
+    val reminder = GeoReminder(
+        title = title,
+        message = message,
+        latitude = location.latitude,
+        longitude = location.longitude,
+        radius = radius,
+        triggerType = type,
+        address = address
+    )
+
+    saveReminderToFirebase(context, reminder) { success, msg ->
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+}
+
+
+fun saveReminderToFirebase(
+    context: Context,
+    reminder: GeoReminder,
+    onResult: (Boolean, String) -> Unit
+) {
+    try {
+        val email = UserPrefs.getEmail(context)
+        if (email.isBlank()) {
+            onResult(false, "User not logged in")
+            return
+        }
+
+        val safeEmail = email.replace(".", "_")
+        val ref = FirebaseDatabase.getInstance().getReference("Reminders/$safeEmail")
+
+        val reminderId = ref.push().key ?: System.currentTimeMillis().toString()
+
+        val reminderData = reminder.copy(reminderId = reminderId)
+
+        ref.child(reminderId).setValue(reminderData)
+            .addOnSuccessListener { onResult(true, "Reminder saved successfully") }
+            .addOnFailureListener { onResult(false, it.message ?: "Unknown error") }
+
+    } catch (e: Exception) {
+        onResult(false, e.message ?: "Unexpected error")
+    }
 }
