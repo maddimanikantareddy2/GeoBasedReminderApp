@@ -1,7 +1,7 @@
 package s3521330manikantareddy.teesproject.geobasedreminderapp
 
-import android.R.attr.scaleX
-import android.R.attr.scaleY
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,8 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Upcoming
 import androidx.compose.material3.Icon
@@ -39,18 +38,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.ReminderViewModel
 
 class ContainerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,27 +87,57 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
 
     object UpcomingReminder :
         BottomNavItem("upcomingreminder", "Upcoming Reminders", Icons.Default.Upcoming)
+
+    object ProfileScreen :
+        BottomNavItem("profilescreen", "Profile Screen", Icons.Default.AccountCircle)
 }
 
-
-
-
-@Composable
-fun UpcomingReminders() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Upcoming Reminders")
-    }
-}
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
+
+    val context = LocalContext.current
+
+    val viewModel: ReminderViewModel = viewModel()
+
+//    val parentEntry = remember(navController) {
+//        navController.getBackStackEntry(BottomNavItem.AddReminder.route)
+//    }
+
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.AddReminder.route
     ) {
-        composable(BottomNavItem.AddReminder.route) { SetReminderScreen() }
-        composable(BottomNavItem.SavedReminder.route) { SavedReminders() }
-        composable(BottomNavItem.UpcomingReminder.route) { UpcomingReminders() }
+        composable(BottomNavItem.AddReminder.route) {
+//            val viewModel: ReminderViewModel = viewModel()
+            SetReminderScreen(viewModel = viewModel)
+        }
+        composable(BottomNavItem.SavedReminder.route) {
+//            val viewModel: ReminderViewModel = viewModel(parentEntry)
+            SavedRemindersScreen(viewModel)
+        }
+
+        composable(BottomNavItem.UpcomingReminder.route) {
+//            val viewModel: ReminderViewModel =  viewModel(parentEntry)
+            val reminders = viewModel.reminders  // if using mutableStateListOf()
+
+            RemindersHistoryScreen(
+                reminders = reminders
+            )
+        }
+
+        composable(BottomNavItem.ProfileScreen.route) {
+            ProfileScreen(
+                UserPrefs.getName(context),
+                UserPrefs.getEmail(context),
+                onLogout = {
+                    UserPrefs.markLoginStatus(context, false)
+                    context.startActivity(Intent(context, LoginActivity::class.java))
+                    (context as Activity).finish()
+                }
+            )
+        }
+
     }
 }
 
@@ -115,7 +148,8 @@ fun CustomBottomBar(
     val items = listOf(
         BottomNavItem.AddReminder,
         BottomNavItem.SavedReminder,
-        BottomNavItem.UpcomingReminder
+        BottomNavItem.UpcomingReminder,
+        BottomNavItem.ProfileScreen
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

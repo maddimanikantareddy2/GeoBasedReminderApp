@@ -15,6 +15,7 @@ firebaseDatabaseKtx = "21.0.0"
 navigationCompose = "2.9.6"
 uiText = "1.9.5"
 foundation = "1.10.0"
+playServicesLocation = "21.3.0"
 
 
 
@@ -40,6 +41,7 @@ firebase-database-ktx = { group = "com.google.firebase", name = "firebase-databa
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]

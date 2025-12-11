@@ -1,56 +1,48 @@
 package s3521330manikantareddy.teesproject.geobasedreminderapp
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.database.FirebaseDatabase
-import com.google.maps.android.compose.Circle
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.GeoReminderService
+import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.GeofenceHelper
+import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.ReminderViewModel
+import s3521330manikantareddy.teesproject.geobasedreminderapp.room.ReminderEntity
 import java.util.Locale
 
 suspend fun fetchAddress(context: Context, latLng: LatLng): String {
@@ -65,19 +57,78 @@ suspend fun fetchAddress(context: Context, latLng: LatLng): String {
     }
 }
 
+fun hasFinePermission(context: Context): Boolean {
+    return ActivityCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+}
 
-@Preview(showBackground = true)
+fun hasBackgroundPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
+    }
+}
+
+fun hasNotificationPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    } else true
+}
+
+
+
 @Composable
-fun SetReminderScreenPreview() {
-    SetReminderScreen()
+fun BackgroundPermissionDialog(
+    onDismiss: () -> Unit,
+    onRequestFine: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = {
+                onRequestFine()
+                onDismiss()
+            }) {
+                Text("Allow")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = {
+            Text("Allow Background Location?")
+        },
+        text = {
+            Text(
+                "To trigger geo-reminders even when the app is closed, we need Background Location permission.\n\n" +
+                        "We only use your location to check when you enter or exit saved reminder areas."
+            )
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MissingPermission")
 @Composable
-fun SetReminderScreen() {
+fun SetReminderScreen(
+    viewModel: ReminderViewModel
+) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
+    // UI state
     var reminderTitle by remember { mutableStateOf("") }
     var reminderMessage by remember { mutableStateOf("") }
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -86,19 +137,62 @@ fun SetReminderScreen() {
     var addressText by remember { mutableStateOf("") }
     var isAddressLoading by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
+    val activity = context as Activity
+    val serviceIntent = Intent(context, GeoReminderService::class.java)
+    ContextCompat.startForegroundService(context, serviceIntent)
 
-    // camera
+
+    // permission dialog state
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    val backgroundLocationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            Toast.makeText(context, "Background location granted.", Toast.LENGTH_SHORT).show()
+        } else {
+            // If denied permanently you may want to guide the user to settings
+            Toast.makeText(context, "Background location is required for geofencing.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // permission launchers
+    val fineLocationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            // request background (Android Q+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } else {
+                Toast.makeText(context, "Location permission granted", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(context, "Fine location permission is required to use geofencing.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) {
+            Toast.makeText(context, "Notification permission is required to show reminders", Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+
+    // camera state for map
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(20.5937, 78.9629), 4f)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Fixed top map (won't scroll)
+        // Fixed top map
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp), // fixed height - adjust as needed
+                .height(300.dp),
             shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
@@ -111,18 +205,16 @@ fun SetReminderScreen() {
                 properties = properties,
                 uiSettings = uiSettings,
                 onMapClick = { latLng ->
-                    // update selected location immediately
                     selectedLocation = latLng
                     isAddressLoading = true
 
-                    // launch suspend fetch from composition scope
+                    // launch suspend fetch from coroutine scope
                     coroutineScope.launch {
                         addressText = fetchAddress(context, latLng)
                         isAddressLoading = false
                     }
                 }
             ) {
-                // show marker + circle if location selected
                 selectedLocation?.let { latLng ->
                     Marker(
                         state = MarkerState(position = latLng),
@@ -130,8 +222,8 @@ fun SetReminderScreen() {
                     )
                     Circle(
                         center = latLng,
-                        radius = radius.toDouble(), // meters
-                        fillColor = Color(0x332196F3),     // semi-transparent (change color if you want)
+                        radius = radius.toDouble(),
+                        fillColor = Color(0x332196F3),
                         strokeColor = Color(0xFF2196F3),
                         strokeWidth = 3f
                     )
@@ -139,14 +231,14 @@ fun SetReminderScreen() {
             }
         }
 
-        // Scrollable content below the fixed map
+        // Scrollable content below map
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp) // spacing around content
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Address / Loading
+            // Address display
             if (selectedLocation != null) {
                 if (isAddressLoading) {
                     Text("Fetching address...", color = Color.Gray, fontStyle = FontStyle.Italic)
@@ -156,7 +248,7 @@ fun SetReminderScreen() {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Radius slider (visible only after selecting location)
+            // Radius slider
             if (selectedLocation != null) {
                 Text("Radius: ${radius.toInt()} meters", fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(6.dp))
@@ -170,7 +262,7 @@ fun SetReminderScreen() {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Title field
+            // Title
             OutlinedTextField(
                 value = reminderTitle,
                 onValueChange = { reminderTitle = it },
@@ -181,7 +273,7 @@ fun SetReminderScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Message field
+            // Message
             OutlinedTextField(
                 value = reminderMessage,
                 onValueChange = { reminderMessage = it },
@@ -202,22 +294,70 @@ fun SetReminderScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Save button
+            // Save button with permission flow
             Button(
                 onClick = {
-                    if (selectedLocation != null && reminderTitle.isNotBlank()) {
+                    // Validate
+                    if (selectedLocation == null) {
+                        Toast.makeText(context, "Please select location on map", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (reminderTitle.isBlank()) {
+                        Toast.makeText(context, "Please enter reminder title", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
 
-                        Toast.makeText(context, "Reminder saved!", Toast.LENGTH_SHORT).show()
+                    if (!hasNotificationPermission(context)) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                        return@Button
+                    }
 
-                        onSaveReminder(
-                            context = context,
-                            title = reminderTitle.trim(),
-                            location = selectedLocation!!,
-                            type = reminderType,
-                            message = reminderMessage.trim(),
-                            radius = radius,
-                            address = addressText
-                        )
+                    // Check permissions: fine + background (if needed)
+                    val fineGranted = hasFinePermission(context)
+                    val bgGranted = hasBackgroundPermission(context)
+
+                    when {
+                        !fineGranted -> {
+                            // Request fine location (dialog will chain to background request)
+                            fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        }
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !bgGranted -> {
+                            // show dialog explaining why and then request
+                            showPermissionDialog = true
+                        }
+                        else -> {
+                            // all permissions ok -> save & register
+                            val reminder = ReminderEntity(
+                                id = System.currentTimeMillis().toString(),
+                                title = reminderTitle.trim(),
+                                message = reminderMessage.trim(),
+                                latitude = selectedLocation!!.latitude,
+                                longitude = selectedLocation!!.longitude,
+                                radius = radius,
+                                triggerType = reminderType
+                            )
+
+                            // Save to Room via ViewModel
+                            viewModel.addReminder(reminder) { success ->
+                                if (success) {
+                                    Toast.makeText(context, "Reminder saved!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Failed to save reminder!", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                            // Register geofence (in background coroutine)
+                            coroutineScope.launch {
+                                registerGeofence(context, reminder)
+
+                                ContextCompat.startForegroundService(
+                                    context,
+                                    Intent(context, GeoReminderService::class.java)
+                                )
+                            }
+                        }
                     }
                 },
                 modifier = Modifier
@@ -228,12 +368,21 @@ fun SetReminderScreen() {
                 Text("Save Reminder", fontSize = 16.sp)
             }
 
-            Spacer(modifier = Modifier.height(40.dp)) // bottom spacing so button isn't flush to bottom
+            Spacer(modifier = Modifier.height(40.dp))
         }
+    }
+
+    if (showPermissionDialog) {
+        BackgroundPermissionDialog(
+            onDismiss = { showPermissionDialog = false },
+            onRequestFine = {
+                // request fine first; the fine launcher will request background afterwards
+                fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        )
     }
 }
 
-// -------------------------- CHIP COMPONENT --------------------------
 @Composable
 fun TriggerChip(
     text: String,
@@ -258,68 +407,43 @@ fun TriggerChip(
     }
 }
 
-data class GeoReminder(
-    val reminderId: String = "",
-    val title: String = "",
-    val message: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
-    val radius: Float = 200f,
-    val triggerType: String = "", // Arrive / Leave
-    val address: String = "",
-    val timestamp: Long = System.currentTimeMillis()
-)
+fun registerGeofence(context: Context, reminder: ReminderEntity) {
+    val geofenceHelper = GeofenceHelper(context)
+    val geofencingClient = LocationServices.getGeofencingClient(context)
 
-fun onSaveReminder(
-    context: Context,
-    title: String,
-    location: LatLng,
-    type: String,
-    message: String,
-    radius: Float,
-    address: String
-) {
+    val transitionType = if (reminder.triggerType == "Arrive")
+        Geofence.GEOFENCE_TRANSITION_ENTER
+    else
+        Geofence.GEOFENCE_TRANSITION_EXIT
 
-    val reminder = GeoReminder(
-        title = title,
-        message = message,
-        latitude = location.latitude,
-        longitude = location.longitude,
-        radius = radius,
-        triggerType = type,
-        address = address
+    val geofence = geofenceHelper.getGeofence(
+        reminder.id,
+        reminder.latitude,
+        reminder.longitude,
+        reminder.radius,
+        transitionType
     )
 
-    saveReminderToFirebase(context, reminder) { success, msg ->
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    val request = geofenceHelper.getGeofencingRequest(geofence)
+    val pendingIntent = geofenceHelper.getPendingIntent()
+
+    // ensure background permission is granted before registering
+    if (!hasBackgroundPermission(context)) {
+        Toast.makeText(context, "Please allow Background Location for geofence", Toast.LENGTH_LONG).show()
+        return
     }
-}
 
-
-fun saveReminderToFirebase(
-    context: Context,
-    reminder: GeoReminder,
-    onResult: (Boolean, String) -> Unit
-) {
-    try {
-        val email = UserPrefs.getEmail(context)
-        if (email.isBlank()) {
-            onResult(false, "User not logged in")
-            return
+    geofencingClient.addGeofences(request, pendingIntent)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Geofence registered", Toast.LENGTH_SHORT).show()
         }
+        .addOnFailureListener { e ->
+            e.printStackTrace()
 
-        val safeEmail = email.replace(".", "_")
-        val ref = FirebaseDatabase.getInstance().getReference("Reminders/$safeEmail")
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            context.startActivity(intent)
 
-        val reminderId = ref.push().key ?: System.currentTimeMillis().toString()
-
-        val reminderData = reminder.copy(reminderId = reminderId)
-
-        ref.child(reminderId).setValue(reminderData)
-            .addOnSuccessListener { onResult(true, "Reminder saved successfully") }
-            .addOnFailureListener { onResult(false, it.message ?: "Unknown error") }
-
-    } catch (e: Exception) {
-        onResult(false, e.message ?: "Unexpected error")
-    }
+            Log.e("SetReminderScreen", "Failed to register geofence", e)
+            Toast.makeText(context, "Failed to register geofence", Toast.LENGTH_LONG).show()
+        }
 }

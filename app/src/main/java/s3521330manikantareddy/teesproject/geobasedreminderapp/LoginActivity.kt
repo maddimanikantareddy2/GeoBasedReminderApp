@@ -164,9 +164,6 @@ fun EnterAppScreen() {
 
                         else -> {
 
-
-
-
                             val database = FirebaseDatabase.getInstance()
                             val databaseReference = database.reference
 

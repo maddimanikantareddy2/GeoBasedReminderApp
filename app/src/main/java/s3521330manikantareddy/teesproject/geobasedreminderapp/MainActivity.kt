@@ -37,11 +37,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-           BrandDisplay()
+            BrandDisplay()
         }
     }
 }
-
 
 
 @Composable
@@ -51,15 +50,13 @@ fun BrandDisplay() {
     DisposableEffect(Unit) {
         val job = CoroutineScope(Dispatchers.Main).launch {
             delay(3000)
-    if (UserPrefs.checkLoginStatus==true)
-    {
-        context.startActivity(Intent(context, LoginActivity::class.java))
-        context.finish()
-    }else{
-        context.startActivity(Intent(context, LoginActivity::class.java))
-        context.finish()
-    }
-
+            if (UserPrefs.checkLoginStatus(context)) {
+                context.startActivity(Intent(context, ContainerActivity::class.java))
+                context.finish()
+            } else {
+                context.startActivity(Intent(context, LoginActivity::class.java))
+                context.finish()
+            }
         }
         onDispose { job.cancel() }
     }
