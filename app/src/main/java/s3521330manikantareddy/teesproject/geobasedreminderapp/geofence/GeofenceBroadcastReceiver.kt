@@ -7,9 +7,13 @@ import android.content.Intent
 import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import s3521330manikantareddy.teesproject.geobasedreminderapp.notifications.showGeoNotification
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent?) {
 
         val event = GeofencingEvent.fromIntent(intent!!) ?: return
@@ -17,20 +21,41 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         val geofence = event.triggeringGeofences?.firstOrNull() ?: return
         val transition = event.geofenceTransition
-
         val reminderId = geofence.requestId
 
-        Log.e("Test","Geofence triggered")
+        Log.e("Test", "Geofence triggered")
 
-        when (transition) {
-            Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                Log.e("Test","Entered")
-                showGeoNotification(context, reminderId, "Entered the location!")
-            }
-            Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                Log.e("Test","Left")
-                showGeoNotification(context, reminderId, "Left the location!")
+        // Fetch reminder from Room using coroutine
+        val dao = ReminderDatabase.getDatabase(context).reminderDao()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val reminder = dao.getReminderById(reminderId)
+
+            if (reminder != null) {
+                val title = reminder.title
+                val message = reminder.message
+
+                when (transition) {
+                    Geofence.GEOFENCE_TRANSITION_ENTER -> {
+                        Log.e("Test", "Entered")
+                        showGeoNotification(
+                            context,
+                            title,
+                            message.ifEmpty { "You entered the location!" }
+                        )
+                    }
+
+                    Geofence.GEOFENCE_TRANSITION_EXIT -> {
+                        Log.e("Test", "Exited")
+                        showGeoNotification(
+                            context,
+                            title,
+                            message.ifEmpty { "You left the location!" }
+                        )
+                    }
+                }
             }
         }
     }
 }
+
