@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -164,11 +165,11 @@ fun JoinAppScreen() {
                 .padding(horizontal = 12.dp),
             value = userLocation,
             onValueChange = { userLocation = it },
-            placeholder = { Text("Enter Location") },
+            placeholder = { Text("Enter Place") },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Email Icon",
+                    imageVector = Icons.Default.Map,
+                    contentDescription = "Map Icon",
                     tint = Color.Black
                 )
             },
@@ -248,14 +249,11 @@ fun JoinAppScreen() {
 
                     }
 
-
-                    // Validate DOB empty
                     if (dob.isEmpty()) {
                         Toast.makeText(context, "Enter Date of Birth", Toast.LENGTH_SHORT).show()
                         return@clickable
                     }
 
-                    // Validate DOB format dd-mm-yyyy
                     val dobRegex = Regex("^\\d{2}-\\d{2}-\\d{4}$")
                     if (!dob.matches(dobRegex)) {
                         Toast.makeText(
@@ -266,12 +264,10 @@ fun JoinAppScreen() {
                         return@clickable
                     }
 
-                    // Validate correct calendar date
                     try {
                         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
                         val date = LocalDate.parse(dob, formatter)
 
-                        // Age must be at least 13 (optional)
                         val age = Period.between(date, LocalDate.now()).years
                         if (age < 13) {
                             Toast.makeText(

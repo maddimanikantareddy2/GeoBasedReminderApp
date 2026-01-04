@@ -6,6 +6,7 @@ data class Reminder(
     val message: String,
     val latitude: Double,
     val longitude: Double,
+    val address: String,
     val radius: Float,
     val triggerType: String, // "Arrive" or "Leave"
     val isActive: Boolean = true

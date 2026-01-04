@@ -8,15 +8,12 @@ import androidx.room.*
 @Dao
 interface ReminderDao {
 
-    // INSERT → returns rowId (>0 = success)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReminder(reminder: ReminderEntity): Long
 
-    // UPDATE → returns number of rows updated
     @Update
     suspend fun updateReminder(reminder: ReminderEntity): Int
 
-    // DELETE → returns number of rows deleted
     @Delete
     suspend fun deleteReminder(reminder: ReminderEntity): Int
 
@@ -28,6 +25,15 @@ interface ReminderDao {
 
     @Query("SELECT * FROM reminders WHERE id = :id LIMIT 1")
     suspend fun getReminderById(id: String): ReminderEntity?
+
+    @Query("""
+    UPDATE reminders 
+    SET isTriggered = 1, 
+        triggeredAt = :time 
+    WHERE id = :id
+""")
+    suspend fun markAsTriggered(id: String, time: Long)
+
 
 }
 

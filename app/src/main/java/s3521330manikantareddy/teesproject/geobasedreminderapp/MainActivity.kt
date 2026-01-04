@@ -31,13 +31,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import s3521330manikantareddy.teesproject.geobasedreminderapp.ui.theme.GeoBasedReminderAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BrandDisplay()
+            GeoBasedReminderAppTheme() {
+                BrandDisplay()
+            }
         }
     }
 }
@@ -50,7 +53,7 @@ fun BrandDisplay() {
     DisposableEffect(Unit) {
         val job = CoroutineScope(Dispatchers.Main).launch {
             delay(3000)
-            if (UserPrefs.checkLoginStatus(context)) {
+            if (UserLoginData.checkLoginStatus(context)) {
                 context.startActivity(Intent(context, ContainerActivity::class.java))
                 context.finish()
             } else {

@@ -61,7 +61,6 @@ fun EditReminderBottomSheet(
                 .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
 
-            // ----- HEADER -----
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Edit Reminder",
@@ -73,7 +72,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ----- TITLE FIELD -----
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -83,7 +81,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // ----- MESSAGE FIELD -----
             OutlinedTextField(
                 value = message,
                 onValueChange = { message = it },
@@ -94,7 +91,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ----- TRIGGER TYPE -----
             Text("Trigger Type", fontWeight = FontWeight.SemiBold)
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -106,7 +102,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ----- RADIUS SLIDER -----
             Text("Radius: ${radius.toInt()} meters", fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -120,7 +115,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            // ----- SAVE BUTTON -----
             Button(
                 onClick = {
                     val updated = reminder.copy(
@@ -142,7 +136,6 @@ fun EditReminderBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ----- DELETE BUTTON -----
             OutlinedButton(
                 onClick = {
                     onDelete(reminder)

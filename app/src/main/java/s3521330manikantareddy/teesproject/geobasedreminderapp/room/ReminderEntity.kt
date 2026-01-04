@@ -11,8 +11,15 @@ data class ReminderEntity(
     val message: String,
     val latitude: Double,
     val longitude: Double,
+    val address: String,
     val radius: Float,
-    val triggerType: String,     // "Arrive" or "Leave"
+    val triggerType: String,
+
     val isActive: Boolean = true,
+
+    val isTriggered: Boolean = false,
+    val triggeredAt: Long? = null,
+
     val createdAt: Long = System.currentTimeMillis()
 )
+

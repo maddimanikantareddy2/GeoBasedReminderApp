@@ -27,14 +27,4 @@ fun showGeoNotification(context: Context, title: String, body: String) {
 }
 
 
-private fun createChannel(context: Context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Geofence Alerts",
-            NotificationManager.IMPORTANCE_HIGH
-        )
-        val manager = context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
-    }
-}
+

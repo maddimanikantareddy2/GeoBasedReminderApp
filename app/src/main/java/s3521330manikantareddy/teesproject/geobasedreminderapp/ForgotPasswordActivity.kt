@@ -71,7 +71,6 @@ fun ResetPasswordScreen() {
 
     val context = LocalContext.current.findActivity()
 
-//    val dbRef = FirebaseDatabase.getInstance().getReference("SignedUpUsers")
 
     Column(
         modifier = Modifier
@@ -120,8 +119,6 @@ fun ResetPasswordScreen() {
         Spacer(modifier = Modifier.height(54.dp))
 
 
-
-            // STEP 1 -> EMAIL + DOB
             if (!step2) {
 
 
@@ -227,7 +224,6 @@ fun ResetPasswordScreen() {
                 )
             }
 
-            // STEP 2 -> ENTER NEW PASSWORD
             if (step2) {
 
 

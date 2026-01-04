@@ -1,7 +1,6 @@
 package s3521330manikantareddy.teesproject.geobasedreminderapp
 
 
-import android.R.attr.password
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -49,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.database.FirebaseDatabase
-import kotlin.jvm.java
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +157,8 @@ fun EnterAppScreen() {
                         }
 
                         userPassword.isEmpty() -> {
-                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                .show()
                         }
 
                         else -> {
@@ -176,24 +175,41 @@ fun EnterAppScreen() {
                                         chefData?.let {
 
                                             if (userPassword == it.password) {
-                                                Toast.makeText(context, "Login Successfull", Toast.LENGTH_SHORT).show()
-                                                UserPrefs.markLoginStatus(context!!, true)
-                                                UserPrefs.saveEmail(
+                                                Toast.makeText(
+                                                    context,
+                                                    "Login Successfull",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                UserLoginData.markLoginStatus(context!!, true)
+                                                UserLoginData.saveEmail(
                                                     context,
                                                     email = userEmail
                                                 )
-                                                UserPrefs.saveName(context, snapshot.child("name").value.toString())
+                                                UserLoginData.saveName(
+                                                    context,
+                                                    snapshot.child("name").value.toString()
+                                                )
+                                                UserLoginData.savePlace(context, it.location)
+                                                UserLoginData.saveDOB(context, it.dob)
 
-
-                                                context!!.startActivity(Intent(context, ContainerActivity::class.java))
+                                                context!!.startActivity(
+                                                    Intent(
+                                                        context,
+                                                        ContainerActivity::class.java
+                                                    )
+                                                )
                                                 context.finish()
-                                            }
-                                            else{
-                                                Toast.makeText(context,"Incorrect Credentials",Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Incorrect Credentials",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                         }
                                     } else {
-                                        Toast.makeText(context,"No User Found",Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "No User Found", Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                                 }.addOnFailureListener { exception ->
                                     println("Error retrieving data: ${exception.message}")

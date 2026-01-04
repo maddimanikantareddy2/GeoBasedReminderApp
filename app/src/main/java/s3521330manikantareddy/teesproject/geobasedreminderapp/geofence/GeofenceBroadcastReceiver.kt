@@ -25,10 +25,11 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         Log.e("Test", "Geofence triggered")
 
-        // Fetch reminder from Room using coroutine
         val dao = ReminderDatabase.getDatabase(context).reminderDao()
 
         CoroutineScope(Dispatchers.IO).launch {
+            dao.markAsTriggered(reminderId, System.currentTimeMillis())
+
             val reminder = dao.getReminderById(reminderId)
 
             if (reminder != null) {
