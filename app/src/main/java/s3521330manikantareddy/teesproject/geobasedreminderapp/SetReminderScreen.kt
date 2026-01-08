@@ -69,6 +69,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.GeoReminderService
 //import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.GeoReminderService
 import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.GeofenceHelper
 import s3521330manikantareddy.teesproject.geobasedreminderapp.geofence.ReminderViewModel
@@ -179,6 +180,8 @@ fun SetReminderScreen(
     var addressText by remember { mutableStateOf("") }
     var isAddressLoading by remember { mutableStateOf(false) }
 
+    val serviceIntent = Intent(context, GeoReminderService::class.java)
+
 
     var showPermissionDialog by remember { mutableStateOf(false) }
 
@@ -203,6 +206,7 @@ fun SetReminderScreen(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             } else {
+                ContextCompat.startForegroundService(context, serviceIntent)
                 Toast.makeText(context, "Location permission granted", Toast.LENGTH_SHORT).show()
             }
         } else {
@@ -430,6 +434,12 @@ fun SetReminderScreen(
 
                                 coroutineScope.launch {
                                     registerGeofence(context, reminder)
+
+                                    ContextCompat.startForegroundService(
+                                        context,
+                                        Intent(context, GeoReminderService::class.java)
+                                    )
+
 
                                 }
                             }
